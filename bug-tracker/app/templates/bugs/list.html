@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Bugs - Bug Tracker{% endblock %}
+
+{% block content %}
+<div class="bugs-container">
+    <h1>Bugs</h1>
+
+    <div class="filter-section">
+        <form method="GET" class="filter-form">
+            <input type="text" name="search" placeholder="Search bugs..." value="{{ search }}" class="form-control">
+            <select name="status" class="form-control">
+                <option value="">All Status</option>
+                <option value="open" {% if status == 'open' %}selected{% endif %}>Open</option>
+                <option value="in_progress" {% if status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                <option value="closed" {% if status == 'closed' %}selected{% endif %}>Closed</option>
+            </select>
+            <select name="priority" class="form-control">
+                <option value="">All Priorities</option>
+                <option value="low" {% if priority == 'low' %}selected{% endif %}>Low</option>
+                <option value="medium" {% if priority == 'medium' %}selected{% endif %}>Medium</option>
+                <option value="high" {% if priority == 'high' %}selected{% endif %}>High</option>
+                <option value="critical" {% if priority == 'critical' %}selected{% endif %}>Critical</option>
+            </select>
+            <select name="assignee_id" class="form-control">
+                <option value="">All Assignees</option>
+                {% for user in users %}
+                    <option value="{{ user.id }}" {% if assignee_id == user.id|string %}selected{% endif %}>{{ user.username }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </form>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Assignee</th>
+                <th>Created</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bug in bugs.items %}
+                <tr>
+                    <td><a href="{{ url_for('bugs.detail_bug', bug_id=bug.id) }}">{{ bug.title }}</a></td>
+                    <td><span class="badge badge-{{ bug.status }}">{{ bug.status }}</span></td>
+                    <td><span class="badge badge-{{ bug.priority }}">{{ bug.priority }}</span></td>
+                    <td>{{ bug.assignee.username if bug.assignee else '-' }}</td>
+                    <td>{{ bug.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        <a href="{{ url_for('bugs.detail_bug', bug_id=bug.id) }}" class="link">View</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        {% if bugs.has_prev %}
+            <a href="{{ url_for('bugs.list_bugs', page=bugs.prev_num, search=search, status=status, priority=priority) }}" class="btn">Previous</a>
+        {% endif %}
+
+        {% for page_num in bugs.iter_pages() %}
+            {% if page_num %}
+                {% if page_num == bugs.page %}
+                    <span class="btn active">{{ page_num }}</span>
+                {% else %}
+                    <a href="{{ url_for('bugs.list_bugs', page=page_num, search=search, status=status, priority=priority) }}" class="btn">{{ page_num }}</a>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+
+        {% if bugs.has_next %}
+            <a href="{{ url_for('bugs.list_bugs', page=bugs.next_num, search=search, status=status, priority=priority) }}" class="btn">Next</a>
+        {% endif %}
+    </div>
+</div>
+
+<a href="{{ url_for('bugs.create_bug') }}" class="fab btn-primary"><i class="fas fa-plus"></i></a>
+{% endblock %}
