@@ -1,6 +1,6 @@
 # Bug Tracking System
 
-This Bug Tracking System is a comprehensive web application built with Python Flask and PostgreSQL, designed to streamline issue management. It features a role-based access control system that defines specific workflows for Admins, Developers, and Testers to ensure secure and organized collaboration. Users can efficiently track bugs through their entire lifecycle with integrated tools for file attachments, priority settings, and detailed commenting. Additionally, the system provides visual insights into project health via an interactive dashboard that monitors bug status distribution and recent team activity.
+This Bug Tracking System is built with Python Flask and PostgreSQL, designed to streamline issue management. It features a role-based access control system that defines specific workflows for Admins, Developers, and Testers to ensure secure and organized collaboration. Users can efficiently track bugs through their entire lifecycle with integrated tools for file attachments, priority settings, and detailed commenting. Additionally, the system provides visual insights into project health via an interactive dashboard that monitors bug status distribution and recent team activity.
 
 ## Features
 
