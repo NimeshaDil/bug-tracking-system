@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}{% if user %}Edit{% else %}Create{% endif %} User - Bug Tracker{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>{% if user %}Edit User{% else %}Create User{% endif %}</h1>
+    <form method="POST" class="form">
+        <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required class="form-control" value="{{ user.username if user else '' }}">
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required class="form-control" value="{{ user.email if user else '' }}">
+        </div>
+        {% if not user %}
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required class="form-control" minlength="8">
+        </div>
+        {% endif %}
+        <div class="form-group">
+            <label for="role">Role:</label>
+            <select id="role" name="role" class="form-control">
+                <option value="tester" {% if not user or user.role == 'tester' %}selected{% endif %}>Tester</option>
+                <option value="developer" {% if user and user.role == 'developer' %}selected{% endif %}>Developer</option>
+                <option value="admin" {% if user and user.role == 'admin' %}selected{% endif %}>Admin</option>
+            </select>
+        </div>
+        {% if user %}
+        <div class="form-group">
+            <label for="is_active">
+                <input type="checkbox" id="is_active" name="is_active" {% if user.is_active %}checked{% endif %}> Active
+            </label>
+        </div>
+        {% endif %}
+        <button type="submit" class="btn btn-primary">{% if user %}Update User{% else %}Create User{% endif %}</button>
+    </form>
+</div>
+{% endblock %}

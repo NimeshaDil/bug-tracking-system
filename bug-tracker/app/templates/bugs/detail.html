@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}{{ bug.title }} - Bug Tracker{% endblock %}
+
+{% block content %}
+<div class="bug-detail">
+    <h1>{{ bug.title }}</h1>
+    <div class="bug-meta">
+        <span class="badge badge-{{ bug.status }}">{{ bug.status }}</span>
+        <span class="badge badge-{{ bug.priority }}">{{ bug.priority }}</span>
+        <span>Reporter: <strong>{{ bug.reporter.username }}</strong></span>
+        <span>Created: <strong>{{ bug.created_at.strftime('%Y-%m-%d %H:%M') }}</strong></span>
+    </div>
+
+    <div class="bug-content">
+        <div class="description">
+            <h2>Description</h2>
+            <p>{{ bug.description or 'No description provided.' }}</p>
+        </div>
+
+        {% if current_user.role in ['developer', 'admin'] %}
+        <div class="actions">
+            <form method="POST" action="{{ url_for('bugs.assign_bug', bug_id=bug.id) }}" class="inline">
+                <select name="assignee_id" onchange="this.form.submit();" class="form-control">
+                    <option value="">Assign to...</option>
+                    {% for user in users %}
+                        <option value="{{ user.id }}" {% if bug.assignee_id == user.id %}selected{% endif %}>{{ user.username }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+
+            <form method="POST" action="{{ url_for('bugs.change_status', bug_id=bug.id) }}" class="inline">
+                <select name="status" onchange="this.form.submit();" class="form-control">
+                    <option value="open" {% if bug.status == 'open' %}selected{% endif %}>Open</option>
+                    <option value="in_progress" {% if bug.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                    <option value="closed" {% if bug.status == 'closed' %}selected{% endif %}>Closed</option>
+                </select>
+            </form>
+
+            <a href="{{ url_for('bugs.edit_bug', bug_id=bug.id) }}" class="btn btn-secondary">Edit</a>
+
+            <form method="POST" action="{{ url_for('bugs.delete_bug', bug_id=bug.id) }}" class="inline" onsubmit="return confirm('Are you sure?');">
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="attachments">
+        <h2>Attachments</h2>
+        <ul class="attachment-list">
+            {% for attachment in attachments %}
+                <li>
+                    <i class="fas fa-file"></i>
+                    <a href="{{ url_for('static', filename='uploads/' + attachment.stored_filename) }}" target="_blank">{{ attachment.filename }}</a>
+                    <small>({{ (attachment.file_size / 1024) | round(2) }}KB)</small>
+                    {% if current_user.id == attachment.uploaded_by or current_user.role == 'admin' %}
+                        <form method="POST" action="{{ url_for('bugs.delete_attachment', attachment_id=attachment.id) }}" class="inline">
+                            <button type="submit" class="btn-delete" onclick="return confirm('Delete this file?');">Delete</button>
+                        </form>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+
+        <form method="POST" action="{{ url_for('bugs.upload_attachment', bug_id=bug.id) }}" enctype="multipart/form-data" class="upload-form">
+            <input type="file" name="file" required class="form-control">
+            <button type="submit" class="btn btn-primary">Upload File</button>
+        </form>
+    </div>
+
+    <div class="comments">
+        <h2>Comments</h2>
+        <div class="comments-list">
+            {% for comment in comments %}
+                <div class="comment">
+                    <strong>{{ comment.author.username }}</strong>
+                    <span class="comment-date">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                    <p>{{ comment.body }}</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        <form method="POST" action="{{ url_for('bugs.add_comment', bug_id=bug.id) }}" class="comment-form">
+            <textarea name="body" placeholder="Add a comment..." required class="form-control"></textarea>
+            <button type="submit" class="btn btn-primary">Post Comment</button>
+        </form>
+    </div>
+
+    <a href="{{ url_for('bugs.list_bugs') }}" class="btn btn-secondary">Back to Bugs</a>
+</div>
+{% endblock %}

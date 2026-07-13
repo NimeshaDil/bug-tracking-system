@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Bug Tracker{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <h1>Dashboard</h1>
+    <div class="stats-container">
+        <div class="stat-card">
+            <div class="stat-icon open"><i class="fas fa-exclamation-circle"></i></div>
+            <div class="stat-content">
+                <div class="stat-number" id="open-count">0</div>
+                <div class="stat-label">Open Bugs</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon progress"><i class="fas fa-spinner"></i></div>
+            <div class="stat-content">
+                <div class="stat-number" id="progress-count">0</div>
+                <div class="stat-label">In Progress</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon closed"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-content">
+                <div class="stat-number" id="closed-count">0</div>
+                <div class="stat-label">Closed Bugs</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="charts-container">
+        <div class="chart-wrapper">
+            <h2>Bugs by Status</h2>
+            <canvas id="statusChart"></canvas>
+        </div>
+        <div class="chart-wrapper">
+            <h2>Bugs by Priority</h2>
+            <canvas id="priorityChart"></canvas>
+        </div>
+    </div>
+
+    <div class="recent-container">
+        <h2>Recent Bugs</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Created</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="recent-bugs">
+                <tr><td colspan="5">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<a href="{{ url_for('bugs.create_bug') }}" class="fab btn-primary"><i class="fas fa-plus"></i></a>
+
+<script>
+    async function loadDashboardStats() {
+        try {
+            const response = await fetch('{{ url_for("dashboard.get_stats") }}');
+            const data = await response.json();
+            
+            document.getElementById('open-count').textContent = data.total_open;
+            document.getElementById('closed-count').textContent = data.total_closed;
+            document.getElementById('progress-count').textContent = data.status.in_progress || 0;
+            
+            initStatusChart(data.status);
+            initPriorityChart(data.priority);
+            loadRecentBugs(data.recent);
+        } catch (error) {
+            console.error('Error loading dashboard stats:', error);
+        }
+    }
+
+    function initStatusChart(statusData) {
+        const ctx = document.getElementById('statusChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Open', 'In Progress', 'Closed'],
+                datasets: [{
+                    data: [statusData.open || 0, statusData.in_progress || 0, statusData.closed || 0],
+                    backgroundColor: ['#ff6b6b', '#ffd93d', '#6bcf7f']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true
+            }
+        });
+    }
+
+    function initPriorityChart(priorityData) {
+        const labels = Object.keys(priorityData);
+        const values = Object.values(priorityData);
+        const ctx = document.getElementById('priorityChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels.length > 0 ? labels : ['No Data'],
+                datasets: [{
+                    label: 'Count',
+                    data: values.length > 0 ? values : [0],
+                    backgroundColor: ['#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    function loadRecentBugs(bugs) {
+         const tbody = document.getElementById('recent-bugs');
+         tbody.innerHTML = '';
+         if (bugs.length === 0) {
+             tbody.innerHTML = '<tr><td colspan="5">No bugs yet</td></tr>';
+             return;
+         }
+         bugs.forEach(bug => {
+             const detailUrl = `/bugs/${bug.id}`;
+             const row = document.createElement('tr');
+             row.innerHTML = `
+                 <td><a href="${detailUrl}">${bug.title}</a></td>
+                 <td><span class="badge badge-${bug.status}">${bug.status}</span></td>
+                 <td><span class="badge badge-${bug.priority}">${bug.priority}</span></td>
+                 <td>${bug.created_at}</td>
+                 <td><a href="${detailUrl}" class="link">View</a></td>
+             `;
+             tbody.appendChild(row);
+         });
+     }
+
+    document.addEventListener('DOMContentLoaded', loadDashboardStats);
+</script>
+{% endblock %}
