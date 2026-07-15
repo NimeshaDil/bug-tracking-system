@@ -1,0 +1,37 @@
+name: Changelog CI
+
+on:
+  workflow_run:
+    workflows: ["Release"]
+    types:
+      - completed
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  changelog:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Get latest release version
+        id: latest_release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version=$(gh release view --json tagName --jq '.tagName')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Run Changelog CI
+        uses: saadmk11/changelog-ci@v1.2.0
+        with:
+          release_version: ${{ steps.latest_release.outputs.version }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
