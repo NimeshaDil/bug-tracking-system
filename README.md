@@ -48,6 +48,12 @@ This Bug Tracking System is built with Python Flask and PostgreSQL, designed to 
 
 ## Tech Stack
 
+### Infrastructure
+- **Containerization**: Docker
+- **Orchestration**: Docker Compose
+- **Web Server**: Gunicorn
+- **Reverse Proxy**: Can use Nginx
+
 ### Backend
 - **Framework**: Flask 3.0.3
 - **Database ORM**: Flask-SQLAlchemy
@@ -62,13 +68,7 @@ This Bug Tracking System is built with Python Flask and PostgreSQL, designed to 
 - **JavaScript**: Vanilla JS with Fetch API
 - **Charts**: Chart.js 4.4.0
 
-### Infrastructure
-- **Containerization**: Docker
-- **Orchestration**: Docker Compose
-- **Web Server**: Gunicorn
-- **Reverse Proxy**: Can use Nginx
-
-## Prerequisites
+### Prerequisites
 
 - Docker
 - Docker Compose
@@ -107,30 +107,10 @@ Login with these credentials:
 | dev@example.com | password123 | Developer |
 | tester@example.com | password123 | Tester |
 
-## Project Structure
+---
 
-```
-bug-tracker/
-├── app/
-│   ├── models.py           # Database models
-│   ├── utils.py            # Utility functions and decorators
-│   ├── __init__.py         # App factory
-│   ├── routes/
-│   │   ├── auth.py         # Authentication routes
-│   │   ├── bugs.py         # Bug management routes
-│   │   ├── dashboard.py    # Dashboard and statistics
-│   │   └── users.py        # User management (admin)
-│   ├── templates/          # Jinja2 templates
-│   ├── static/             # CSS and JS files
-│   └── uploads/            # Uploaded files
-├── config.py               # Configuration
-├── wsgi.py                 # WSGI entry point
-├── requirements.txt        # Python dependencies
-├── Dockerfile              # Docker image definition
-├── docker-compose.yml      # Docker Compose configuration
-├── .env.example            # Environment variables template
-└── README.md               # This file
-```
+<details>
+<summary><b>Configuration Details</b></summary>
 
 ## Database Schema
 
@@ -217,7 +197,7 @@ DATABASE_URL=postgresql://user:pass@host:port/db
 UPLOAD_FOLDER=app/uploads
 ```
 
-## Security Features
+### Security Features
 
 - CSRF protection with Flask-WTF
 - SQL injection prevention via SQLAlchemy ORM
@@ -230,16 +210,10 @@ UPLOAD_FOLDER=app/uploads
 - Non-root Docker user
 - Environment-based secrets
 
-## Performance Considerations
+</details>
 
-- Database indexes on frequently queried columns (status, assignee, created_at)
-- Pagination to limit query results
-- CSS and JS minification in production
-- Nginx gzip compression (when used as reverse proxy)
-- Connection pooling
-- Dashboard statistics caching (optional)
-
-## Troubleshooting
+<details>
+<summary><b>Troubleshooting</b></summary>
 
 ### Database Connection Error
 ```
@@ -262,13 +236,13 @@ mkdir -p app/uploads
 chmod 755 app/uploads
 ```
 
-## File Upload Limits
+### File Upload Limits
 
 - Allowed file types: png, jpg, jpeg, gif, txt, log, pdf, docx
 - Max file size: 25MB
 - Max attachments per bug: Unlimited (limited by 25MB per file)
 
-## Testing
+### Testing
 
 To test the application:
 
@@ -279,7 +253,7 @@ To test the application:
 5. Test search and filters
 6. Test role permissions
 
-## Deployment
+### Deployment
 
 For production deployment:
 
@@ -306,14 +280,12 @@ nginx:
     - web
 ```
 
-## License
+</details>
 
-MIT License
+---
 
-## Support
-
-For issues and questions, please open an issue in the repository.
-
-## Author
-
-Nimesha Dilshan
+```
+License: MIT License
+Support: For issues and questions, please open an issue in the repository.
+Author: Nimesha Dilshan
+```
